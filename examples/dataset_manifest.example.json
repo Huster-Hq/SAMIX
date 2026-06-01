@@ -1,0 +1,68 @@
+{
+  "dataset_name": "samix_mixed_supervision_v1",
+  "root": ".",
+  "annotation_types": ["mask", "box", "scribble", "point", "class", "unlabeled"],
+  "splits": {
+    "train": ["img_000001", "img_000002", "img_000003", "img_000004"],
+    "val": ["img_000101"],
+    "test": ["img_000201"]
+  },
+  "images": {
+    "img_000001": {
+      "file_name": "images/img_000001.jpg",
+      "split": "train",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "mask": "masks/img_000001.png",
+        "class": "classes/img_000001.json"
+      }
+    },
+    "img_000002": {
+      "file_name": "images/img_000002.jpg",
+      "split": "train",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "box": "boxes/img_000002.json",
+        "point": "points/img_000002.json"
+      }
+    },
+    "img_000003": {
+      "file_name": "images/img_000003.jpg",
+      "split": "train",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "scribble": "scribbles/img_000003.json"
+      }
+    },
+    "img_000004": {
+      "file_name": "images/img_000004.jpg",
+      "split": "train",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "unlabeled": "unlabeled/img_000004.json"
+      }
+    },
+    "img_000101": {
+      "file_name": "images/img_000101.jpg",
+      "split": "val",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "mask": "masks/img_000101.png"
+      }
+    },
+    "img_000201": {
+      "file_name": "images/img_000201.jpg",
+      "split": "test",
+      "width": 1280,
+      "height": 720,
+      "labels": {
+        "class": "classes/img_000201.json"
+      }
+    }
+  }
+}
