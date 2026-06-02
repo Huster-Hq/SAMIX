@@ -13,7 +13,7 @@ Yingjie Guo<sup>1</sup> &emsp;
 [Qiang  Li](https://faculty.hust.edu.cn/liqiang15/zh_CN/index.htm)<sup>1</sup> &emsp;
 [Zhiwei Wang](https://andysis.github.io/)<sup>1✉</sup> &emsp;
 
-<sup>1</sup>Huazhong University of Science and Technology &emsp; <sup>2</sup>Shanghai Jiao Tong University &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>Australian National University &emsp;
+<sup>1</sup>Huazhong University of Science and Technology &emsp; <sup>2</sup>Shanghai Jiao Tong University &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>4</sup>Australian National University &emsp;
 
 <sup>✉</sup> Corresponding Author.
 
