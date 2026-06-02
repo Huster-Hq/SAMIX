@@ -1,280 +1,185 @@
 # SAMIX
 
-Official codebase in progress for:
+Official codebase for:
 
-**SAMIX: Reinforcing SAM2 with Semantic Adapter and Reference Selecting Policy**
-
+**SAMIX: Reinforcing SAM2 with Semantic Adapter and Reference Selecting Policy**  
 CVPR 2026
 
-`SAMIX` studies mixed-supervision segmentation with a SAM2-centered design. The
-full method contains two major parts:
+This repository currently releases the `SA-SAM2` and co-training parts of the
+project:
 
 - `SA-SAM2`: a SAM2-based in-context segmentor with semantic adapters inserted
   into the image encoder
-- `SPNet`: a reference selecting policy for retrieving useful support examples
-
-This repository currently focuses on the first part and the training scaffold
-around it:
-
-- SAM2 image encoder with SANSA-style semantic adapters
-- Polyp-PVT segmentation model with EMA teacher
-- warmup + co-training pipeline
-- mixed-supervision dataset format for `mask / box / scribble / point / class / unlabeled`
+- `Polyp-PVT + EMA`: an auxiliary segmentation model used during co-training
+- a mixed-supervision training framework for `mask / box / scribble / point`
 
 `SPNet` is not included yet.
 
-## Overview
+## Highlights
 
-The current training framework has two stages.
+- Official `SAM2` is used as the base model
+- Only adapter parameters are updated during warmup
+- Support samples are selected from the full-mask pool with nearest-neighbor
+  retrieval over `SA-SAM2` image-encoder features
+- TensorBoard logging, evaluation, checkpoints, and qualitative visualizations
+  are integrated into the training pipeline
 
-### 1. Warmup stage
-
-Only `SA-SAM2` is trained. The original SAM2 parameters stay frozen, and only
-the semantic adapter parameters are updated. Training follows a few-shot /
-in-context segmentation style:
-
-- support images provide high-quality mask supervision
-- query images are segmented with SAM2 memory and prompt conditioning
-- the adapter learns to inject task-specific semantics into the SAM2 encoder
-
-### 2. Co-training stage
-
-After warmup, three modules are optimized together:
-
-- `SA-SAM2`
-- `Polyp-PVT` segmentation model
-- `EMA` copy of `Polyp-PVT` as teacher
-
-In this stage, `SA-SAM2` acts as an in-context segmentor that uses support
-images as semantic references, while `Polyp-PVT` learns from a mix of:
-
-- dense supervision on mask-labeled samples
-- weak supervision on box / scribble / point / class labels
-- pseudo-label and consistency signals on weak or unlabeled samples
-
-## Repository Status
-
-This repository has already been brought to a runnable baseline:
-
-- `SA-SAM2` can be built on top of the official `SAM2`
-- `Polyp-PVT` can be instantiated with `timm`
-- `warmup_step` and `cotrain_step` have passed remote smoke tests on the target server
-
-At the same time, this is still an active research codebase rather than a final
-camera-ready release. In particular:
-
-- `SPNet` is not implemented yet
-- some weak-supervision losses are practical defaults and may still be refined
-- training scripts are ready for real data, but final benchmark configs and
-  dataset-specific recipes still need to be polished
-
-## Code Structure
+## Repository Layout
 
 ```text
 SAMIX/
 |-- README.md
 |-- requirements.txt
+|-- .gitmodules
 |-- docs/
 |   `-- data_format.md
 |-- examples/
 |   `-- dataset_manifest.example.json
+|-- external/
+|   `-- sam2/                  # official SAM2 submodule
 |-- samix/
-|   |-- adapters.py          # semantic adapter modules
-|   |-- data.py              # mixed-supervision dataset and episode sampling
-|   |-- ema.py               # EMA teacher
-|   |-- framework.py         # top-level training container
-|   |-- losses.py            # dense and weak supervision losses
-|   |-- model_utils.py       # dataclasses and utility structures
-|   |-- polyp_pvt.py         # Polyp-PVT segmentation model
-|   |-- prompts.py           # annotation -> SAM prompt conversion
-|   |-- sa_hiera.py          # SAM2 Hiera trunk with semantic adapters
-|   |-- sa_sam2.py           # SAM2-based in-context segmentor
-|   |-- training.py          # warmup and co-training logic
-|   `-- __init__.py
+|   |-- adapters.py
+|   |-- data.py
+|   |-- ema.py
+|   |-- eval.py
+|   |-- framework.py
+|   |-- losses.py
+|   |-- model_utils.py
+|   |-- polyp_pvt.py
+|   |-- prompts.py
+|   |-- sa_hiera.py
+|   |-- sa_sam2.py
+|   |-- training.py
+|   `-- visualization.py
 `-- scripts/
-    |-- build_manifest.py    # build dataset manifest json
-    |-- demo_random.py       # quick random-tensor smoke test
-    |-- train_cotrain.py     # warmup + co-training entrypoint
-    `-- upload_to_4090_6_hq.py
+    |-- build_manifest.py
+    |-- prepare_joint_polyp_dataset.py
+    |-- prepare_polyp_train_layout.py
+    |-- train.sh
+    `-- train_cotrain.py
 ```
+
+Large assets such as datasets, run outputs, and checkpoints are intentionally
+excluded from the repository.
 
 ## Installation
 
-### 1. Create an environment
+### 1. Create environment
 
 Recommended baseline:
 
 - Python `3.10`
 - PyTorch `2.5.1`
-- CUDA `12.4` or compatible driver/runtime
+- CUDA `12.4`
 
-Then install the Python dependencies:
+Install Python dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Install the official SAM2 package
-
-This repository expects the official `SAM2` codebase to be available. One
-practical setup is:
+### 2. Initialize SAM2 submodule
 
 ```bash
-git clone https://github.com/facebookresearch/segment-anything-2.git
-cd segment-anything-2
+git submodule update --init --recursive
+```
+
+### 3. Install official SAM2
+
+```bash
+cd external/sam2
 pip install -e .
 ```
 
-If you are working in an environment where building custom CUDA ops is not
-desired, install SAM2 in the same way you validated locally for your platform.
+### 4. Download SAM2 checkpoints
 
-### 3. Prepare SAM2 checkpoints
+Use the official checkpoint script inside the SAM2 submodule, or provide your
+own checkpoint path when launching training.
 
-`train_cotrain.py` requires:
+## Data Format
 
-- `--sam2-root`: path to the official `segment-anything-2` repo
-- `--sam2-ckpt`: path to a SAM2 checkpoint such as `sam2_hiera_tiny.pt`,
-  `sam2_hiera_base_plus.pt`, or `sam2_hiera_large.pt`
-- `--sam2-config`: matching config name such as `sam2_hiera_t.yaml` or
-  `sam2_hiera_l.yaml`
+The repository supports a unified mixed-supervision layout. See:
 
-## Mixed-Supervision Dataset Format
+- [docs/data_format.md](docs/data_format.md)
+- [examples/dataset_manifest.example.json](examples/dataset_manifest.example.json)
 
-The repository uses one shared dataset layout for all supervision types.
-
-```text
-dataset_root/
-|-- images/
-|-- masks/
-|-- boxes/
-|-- scribbles/
-|-- points/
-|-- classes/
-|-- unlabeled/
-`-- splits.json
-```
-
-The key idea is simple:
-
-- image files live in `images/`
-- each supervision type has a parallel annotation folder
-- `splits.json` declares train / val / test membership and the available label
-  types for each image
-
-See:
-
-- [docs/data_format.md](C:\Users\HuQiang\Documents\SAMIX_Github\docs\data_format.md)
-- [examples/dataset_manifest.example.json](C:\Users\HuQiang\Documents\SAMIX_Github\examples\dataset_manifest.example.json)
-
-To generate a manifest automatically:
-
-```bash
-python scripts/build_manifest.py \
-  --dataset-root /path/to/dataset \
-  --dataset-name my_dataset \
-  --output /path/to/dataset/splits.json
-```
+For the polyp experiments in this codebase, the training script expects a
+manifest JSON that enumerates training samples and their supervision type.
 
 ## Training
 
-The main training entrypoint is:
+The recommended entrypoint is:
+
+```bash
+bash scripts/train.sh
+```
+
+The default script configuration uses:
+
+- `SAM2.1 Hiera Tiny`
+- warmup for `10` epochs
+- joint training for `50` epochs
+- dual-GPU split by default:
+  - `SA-SAM2 -> cuda:0`
+  - `Seg-Model + EMA -> cuda:1`
+
+You can override defaults through environment variables:
+
+```bash
+BATCH_SIZE=4 OUTPUT_DIR=/path/to/output bash scripts/train.sh
+```
+
+Or call the Python entrypoint directly:
 
 ```bash
 python scripts/train_cotrain.py \
-  --manifest /path/to/dataset/splits.json \
-  --sam2-root /path/to/segment-anything-2 \
-  --sam2-ckpt /path/to/checkpoints/sam2_hiera_tiny.pt \
-  --sam2-config sam2_hiera_t.yaml \
-  --image-size 512 \
-  --shots 1 \
-  --warmup-epochs 5 \
-  --joint-epochs 20 \
-  --batch-size 2 \
-  --num-workers 4 \
-  --device cuda
+  --manifest /path/to/manifest.json \
+  --sam2-root external/sam2 \
+  --sam2-ckpt /path/to/sam2.1_hiera_tiny.pt \
+  --sam2-config configs/sam2.1/sam2.1_hiera_t.yaml
 ```
 
-### What the script does
+## Logging and Evaluation
 
-1. loads the mixed-supervision training split
-2. builds warmup few-shot episodes from mask-labeled samples
-3. builds co-training episodes with support masks and mixed query supervision
-4. initializes `SA-SAM2`, `Polyp-PVT`, and `EMA`
-5. runs warmup training
-6. switches to joint co-training
+During training, the framework records:
 
-## Current Supervision Support
+- warmup and co-training losses
+- TensorBoard scalar curves
+- qualitative visualizations for support/query/prediction examples
+- per-dataset test results on:
+  - `CVC-300`
+  - `CVC-ClinicDB`
+  - `CVC-ColonDB`
+  - `ETIS-LaribPolypDB`
+  - `Kvasir`
+- mean `Dice` and mean `IoU`
 
-The current codebase includes losses or handling for:
+## Current Status
 
-- `mask`: dense segmentation supervision
-- `box`: projection-style `M2B` box supervision
-- `scribble`: sparse stroke supervision
-- `point`: sparse point supervision
-- `class`: image-level presence supervision
-- `unlabeled`: pseudo-label and EMA consistency learning
+Implemented:
 
-These are implemented mainly in:
+- `SA-SAM2` with semantic adapters in the SAM2 image encoder
+- `Polyp-PVT + EMA`
+- warmup + co-training framework
+- mixed-supervision data loading
+- nearest-neighbor support selection
+- TensorBoard logging and test-set evaluation
 
-- [samix/losses.py](C:\Users\HuQiang\Documents\SAMIX_Github\samix\losses.py)
-- [samix/training.py](C:\Users\HuQiang\Documents\SAMIX_Github\samix\training.py)
+Not yet released:
 
-## Quick Sanity Checks
-
-### Python syntax check
-
-```bash
-python -m py_compile samix/*.py scripts/train_cotrain.py
-```
-
-### Minimal import / build check
-
-```python
-from samix import build_sa_sam2, PolypPVT
-
-seg_model = PolypPVT(pretrained_backbone=False)
-print(type(seg_model).__name__)
-```
-
-## Reproducibility Notes
-
-If you want to reproduce experiments cleanly, we recommend tracking the
-following in your run logs:
-
-- SAM2 checkpoint and config name
-- image size
-- support shot count
-- warmup epochs
-- joint training epochs
-- optimizer settings
-- supervision-type sampling ratios
-
-Because this repository is still being reconstructed and polished, we recommend
-pinning:
-
-- the exact `SAM2` commit
-- the exact conda / pip environment
-- dataset manifest version
-
-## Planned Updates
-
-The next high-priority items are:
-
-1. add `SPNet`
-2. align the remaining weak-supervision objectives with the final paper version
-3. add benchmark-specific configs and scripts
-4. add evaluation and inference entrypoints
-5. add released checkpoints and final reproduction recipes
+- `SPNet`
+- final benchmark-specific training recipes
+- released paper checkpoints
 
 ## Acknowledgements
 
-This implementation is built around:
+This codebase builds on:
 
-- the official `SAM2` codebase
-- the semantic adapter idea used in `SANSA`
-- `Polyp-PVT` as the auxiliary segmentation model family
+- the official `SAM2` project
+- `SANSA` for the semantic adapter design reference
+- `Polyp-PVT` for the auxiliary segmentation model family
 
 ## Citation
 
-If you use this repository, please cite the SAMIX paper. A BibTeX entry will be
-added here once the final release metadata is ready.
+If you use this repository, please cite the SAMIX paper. Final BibTeX metadata
+will be added in the public release.

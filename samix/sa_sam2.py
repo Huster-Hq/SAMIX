@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import torch
@@ -10,10 +12,35 @@ from omegaconf import OmegaConf
 from torch import nn
 
 from .model_utils import BackboneOutput, DecoderOutput, SASAM2Output
+
+
 def _imagenet_normalize(x: torch.Tensor) -> torch.Tensor:
     mean = x.new_tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
     std = x.new_tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
     return (x - mean) / std
+
+
+def _resolve_sam2_repo_root(sam2_repo_root: Optional[str]) -> Optional[Path]:
+    if sam2_repo_root:
+        candidate = Path(sam2_repo_root).expanduser().resolve()
+        if not candidate.exists():
+            raise FileNotFoundError(f"SAM2 repo root does not exist: {candidate}")
+        return candidate
+
+    project_root = Path(__file__).resolve().parents[1]
+    bundled = project_root / "external" / "sam2"
+    if bundled.exists():
+        return bundled.resolve()
+    return None
+
+
+def _ensure_sam2_importable(sam2_repo_root: Optional[str]) -> Path | None:
+    resolved_root = _resolve_sam2_repo_root(sam2_repo_root)
+    if resolved_root is not None:
+        resolved_root_str = str(resolved_root)
+        if resolved_root_str not in sys.path:
+            sys.path.insert(0, resolved_root_str)
+    return resolved_root
 
 
 class SASAM2FewShotSegmentor(nn.Module):
@@ -56,6 +83,17 @@ class SASAM2FewShotSegmentor(nn.Module):
         backbone_out = self.sam.forward_image(samples)
         _, vision_feats, vision_pos, feat_sizes = self.sam._prepare_backbone_features(backbone_out)
         return BackboneOutput(orig_size, backbone_out, vision_feats, vision_pos, feat_sizes)
+
+    @torch.no_grad()
+    def extract_global_features(self, images: torch.Tensor) -> torch.Tensor:
+        was_training = self.training
+        self.eval()
+        samples, orig_size = self.preprocess_batch(images)
+        backbone_out = self._forward_backbone(samples, orig_size)
+        features = backbone_out.vision_feats[-1].mean(dim=0)
+        if was_training:
+            self.train()
+        return F.normalize(features, dim=-1)
 
     def _split_prompt(
         self,
@@ -173,7 +211,7 @@ class SASAM2FewShotSegmentor(nn.Module):
 
 
 def build_sa_sam2(
-    sam2_repo_root: str,
+    sam2_repo_root: Optional[str],
     checkpoint_path: str,
     config_name: str = "sam2_hiera_l.yaml",
     adaptformer_stages: Sequence[int] = (2, 3),
@@ -181,6 +219,11 @@ def build_sa_sam2(
     adapter_scale: float = 0.1,
     device: str = "cuda",
 ) -> SASAM2FewShotSegmentor:
+    # Prefer the bundled or explicitly provided SAM2 repo so the project can be
+    # reproduced from one checkout. Fall back to any environment-installed
+    # `sam2` package if no repo root is supplied.
+    _ensure_sam2_importable(sam2_repo_root)
+
     # Import the official SAM2 package first so its config module is initialized
     # in the same way as upstream `build_sam2`.
     import sam2  # noqa: F401

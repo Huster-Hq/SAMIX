@@ -1,4 +1,12 @@
-from .data import CotrainEpisodeDataset, MixedSupervisionDataset, WarmupEpisodeDataset, cotrain_collate, warmup_collate
+from .data import (
+    CotrainEpisodeDataset,
+    MixedSupervisionDataset,
+    NearestSupportSelector,
+    WarmupEpisodeDataset,
+    build_nearest_support_selector,
+    cotrain_collate,
+    warmup_collate,
+)
 from .ema import ModelEMA
 from .framework import SAMIXCoTrainer
 from .polyp_pvt import PolypPVT
@@ -13,8 +21,10 @@ __all__ = [
     "SAMIXCoTrainer",
     "SAMIXTrainer",
     "MixedSupervisionDataset",
+    "NearestSupportSelector",
     "WarmupEpisodeDataset",
     "CotrainEpisodeDataset",
+    "build_nearest_support_selector",
     "warmup_collate",
     "cotrain_collate",
 ]

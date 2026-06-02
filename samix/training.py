@@ -56,20 +56,55 @@ class SAMIXTrainer:
         self.consistency_weight = consistency_weight
         self.weak_weight = weak_weight
 
-    def warmup_step(self, batch: Dict[str, torch.Tensor]) -> WarmupOutput:
+    def warmup_step(self, batch: Dict[str, torch.Tensor | List]) -> WarmupOutput:
         self.model.sa_sam2.train()
         self.warmup_optimizer.zero_grad(set_to_none=True)
+        sa_device = self.model.sa_device
+        batch["support_images"] = batch["support_images"].to(sa_device)
+        batch["support_masks"] = batch["support_masks"].to(sa_device)
+        batch["query_images"] = batch["query_images"].to(sa_device)
+        if batch["query_masks"] is not None:
+            batch["query_masks"] = batch["query_masks"].to(sa_device)
+        query_annotations = [
+            [annotation_to_prompt(label_type, annotation, sa_device) if label_type != "mask" else None]
+            for label_type, annotation in zip(batch["query_label_types"], batch["query_annotations"])
+        ]
         sa_out = self.model.sa_sam2(
             support_images=batch["support_images"],
             support_masks=batch["support_masks"],
             query_images=batch["query_images"],
+            query_annotations=query_annotations,
         )
         logits = sa_out.query_masks[:, 0]
-        target = batch["query_masks"]
-        loss = mask_supervision_loss(logits, target)
+        loss = logits.new_tensor(0.0)
+        metrics: Dict[str, float] = {}
+
+        dense_indices = [idx for idx, label_type in enumerate(batch["query_label_types"]) if label_type == "mask"]
+        if dense_indices:
+            dense_logits = logits[dense_indices]
+            if batch["query_masks"] is not None and len(dense_indices) == logits.shape[0]:
+                dense_target = batch["query_masks"]
+            else:
+                dense_target = torch.stack(
+                    [batch["query_masks_list"][idx] for idx in dense_indices],
+                    dim=0,
+                ).to(sa_device)
+            mask_loss = mask_supervision_loss(dense_logits, dense_target)
+            loss = loss + mask_loss
+            metrics["warmup_mask_loss"] = float(mask_loss.detach().item())
+
+        weak = self._weak_loss(
+            logits,
+            batch["query_label_types"],
+            batch["query_annotations"],
+            image_size=logits.shape[-1],
+        )
+        loss = loss + weak
+        metrics["warmup_weak_loss"] = float(weak.detach().item())
         loss.backward()
         self.warmup_optimizer.step()
-        return WarmupOutput(loss=loss.detach(), metrics={"warmup_loss": float(loss.detach().item())})
+        metrics["warmup_loss"] = float(loss.detach().item())
+        return WarmupOutput(loss=loss.detach(), metrics=metrics)
 
     def _weak_loss(self, logits: torch.Tensor, label_types: List[str], annotations: List[Optional[Dict]], image_size: int) -> torch.Tensor:
         total = logits.new_tensor(0.0)
@@ -98,21 +133,28 @@ class SAMIXTrainer:
         self.model.train()
         self.joint_optimizer.zero_grad(set_to_none=True)
 
-        device = batch["query_images"].device
+        sa_device = self.model.sa_device
+        seg_device = self.model.seg_device
+        support_images = batch["support_images"].to(sa_device)
+        support_masks = batch["support_masks"].to(sa_device)
+        query_images_sa = batch["query_images"].to(sa_device)
+        query_images_seg = batch["query_images"].to(seg_device)
+        dense_target_sa = batch["query_masks"].to(sa_device) if batch["query_masks"] is not None else None
+        dense_target_seg = batch["query_masks"].to(seg_device) if batch["query_masks"] is not None else None
         query_annotations = [
-            [annotation_to_prompt(label_type, annotation, device)]
+            [annotation_to_prompt(label_type, annotation, sa_device)]
             for label_type, annotation in zip(batch["query_label_types"], batch["query_annotations"])
         ]
 
         sa_out = self.model.sa_sam2(
-            support_images=batch["support_images"],
-            support_masks=batch["support_masks"],
-            query_images=batch["query_images"],
+            support_images=support_images,
+            support_masks=support_masks,
+            query_images=query_images_sa,
             query_annotations=query_annotations,
         )
-        seg_out = self.model.seg_model(batch["query_images"])
+        seg_out = self.model.seg_model(query_images_seg)
         with torch.no_grad():
-            ema_out = self.model.ema_model(batch["query_images"])
+            ema_out = self.model.ema_model(query_images_seg)
 
         seg_logits = seg_out["logits"]
         sa_logits = sa_out.query_masks[:, 0]
@@ -120,15 +162,14 @@ class SAMIXTrainer:
         loss = seg_logits.new_tensor(0.0)
         metrics: Dict[str, float] = {}
 
-        if batch["query_masks"] is not None:
-            dense_target = batch["query_masks"]
-            sa_sup = mask_supervision_loss(sa_logits, dense_target)
-            seg_sup = mask_supervision_loss(seg_logits, dense_target)
-            loss = loss + sa_sup + seg_sup
+        if dense_target_sa is not None and dense_target_seg is not None:
+            sa_sup = mask_supervision_loss(sa_logits, dense_target_sa)
+            seg_sup = mask_supervision_loss(seg_logits, dense_target_seg)
+            loss = loss + sa_sup.to(seg_device) + seg_sup
             metrics["sa_supervised"] = float(sa_sup.detach().item())
             metrics["seg_supervised"] = float(seg_sup.detach().item())
 
-        pseudo = pseudo_label_loss(seg_logits, torch.sigmoid(sa_logits.detach()), threshold=0.5)
+        pseudo = pseudo_label_loss(seg_logits, torch.sigmoid(sa_logits.detach()).to(seg_device), threshold=0.5)
         consistency = consistency_loss(seg_logits, ema_logits.detach())
         weak = self._weak_loss(
             seg_logits,
