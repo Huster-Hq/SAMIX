@@ -22,7 +22,7 @@ Yingjie Guo<sup>1</sup> &emsp;
 SAMIX is a RL-empowered in-context segmenter comprising two core components: SA-SAM2 and SPNet. SA-SAM2 leverages a lightweight semantic adapter to transform the vanilla SAM2 into an in-context segmenter, enabling cross-image semantic tracking capabilities. Importantly, SPNet is trained via GRPO with customized verifiable rewards to retrieve valuable visual contexts from a data pool for the query image, effectively empowering SA-SAM2.
 We emoplpy SAMIX in a mix-supervised segmentation framework, where
 We employ SAMIX within a mix-supervised segmentation framework, including mask/box/scribble/point/class-labeled data and unlabeled data. SAMIX is capable of leveraging the in-context segmentation paradigm and utilizing data (with finer-supervision) as in-context examples to provide dense contextual prompts for data (with lower-supervision), thereby offering more reliable pseudo-labels for downstream segmentation models.
-![Main](assets/SAMIX.gif)
+![Main](assets/overview.jpg)
 
 
 
