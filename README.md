@@ -4,15 +4,15 @@
 
 [**📖 Paper**](https://openaccess.thecvf.com/content/CVPR2026/html/Hu_SAMIX_Reinforcing_SAM2_with_Semantic_Adapter_and_Reference_Selecting_Policy_CVPR_2026_paper.html)
 
-[Qiang Hu](https://huster-hq.github.io/)<sup>1</sup> &emsp;
-Jiajie Wei<sup>1</sup> &emsp;
-[Zhenyu Yi](https://scholar.google.com/citations?user=yoY2un8AAAAJ&hl=en)<sup>2</sup> &emsp;
-Zhifen Yan<sup>1</sup> &emsp;
-Yingjie Guo<sup>1</sup> &emsp;
-[Hongkuan Shi](https://scholar.google.com/citations?user=EXgVl7sAAAAJ&hl=en)<sup>3</sup> &emsp;
-[Ge-Peng  Ji](https://gewelsji.github.io/)<sup>4</sup> &emsp;
-[Qiang  Li](https://faculty.hust.edu.cn/liqiang15/zh_CN/index.htm)<sup>1</sup> &emsp;
-[Zhiwei Wang](https://andysis.github.io/)<sup>1✉</sup> &emsp;
+[Qiang Hu](https://huster-hq.github.io/)<sup>1</sup> ·
+Jiajie Wei<sup>1</sup> ·
+[Zhenyu Yi](https://scholar.google.com/citations?user=yoY2un8AAAAJ&hl=en)<sup>2</sup> ·
+Zhifen Yan<sup>1</sup> ·
+Yingjie Guo<sup>1</sup> ·
+[Hongkuan Shi](https://scholar.google.com/citations?user=EXgVl7sAAAAJ&hl=en)<sup>3</sup> ·
+[Ge-Peng  Ji](https://gewelsji.github.io/)<sup>4</sup> ·
+[Qiang  Li](https://faculty.hust.edu.cn/liqiang15/zh_CN/index.htm)<sup>1</sup> ·
+[Zhiwei Wang](https://andysis.github.io/)<sup>1✉</sup> ·
 
 <sup>1</sup>HUST &emsp; <sup>2</sup>SJTU &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>4</sup>ANU &emsp;
 </div>
