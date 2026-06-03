@@ -1,5 +1,7 @@
 # SAMIX: Reinforcing SAM2 with Semantic Adapter and Reference Selecting Policy for Mix-Supervised Segmentation (CVPR 2026)
 
+<div align="center">
+
 [**📖 Paper**](https://openaccess.thecvf.com/content/CVPR2026/html/Hu_SAMIX_Reinforcing_SAM2_with_Semantic_Adapter_and_Reference_Selecting_Policy_CVPR_2026_paper.html)
 
 [Qiang Hu](https://huster-hq.github.io/)<sup>1</sup> &emsp;
@@ -12,10 +14,8 @@ Yingjie Guo<sup>1</sup> &emsp;
 [Qiang  Li](https://faculty.hust.edu.cn/liqiang15/zh_CN/index.htm)<sup>1</sup> &emsp;
 [Zhiwei Wang](https://andysis.github.io/)<sup>1✉</sup> &emsp;
 
-<sup>1</sup>Huazhong University of Science and Technology &emsp; <sup>2</sup>Shanghai Jiao Tong University &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>4</sup>Australian National University &emsp;
-
-<sup>✉</sup> Corresponding Author.
-
+<sup>1</sup>HUST &emsp; <sup>2</sup>SJTU &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>4</sup>ANU &emsp;
+</div>
 
 ## 🚀Overview
 
