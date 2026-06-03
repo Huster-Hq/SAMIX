@@ -1,7 +1,6 @@
-# SAMIX: Reinforcing SAM2 with Semantic Adapter and Reference Selecting Policy for Mix-Supervised Segmentation
+# SAMIX: Reinforcing SAM2 with Semantic Adapter and Reference Selecting Policy for Mix-Supervised Segmentation (CVPR 2026)
 
-[**📖 Paper (CVPR  2026)**](https://openaccess.thecvf.com/content/CVPR2026/html/Hu_SAMIX_Reinforcing_SAM2_with_Semantic_Adapter_and_Reference_Selecting_Policy_CVPR_2026_paper.html)
-
+[**📖 Paper**](https://openaccess.thecvf.com/content/CVPR2026/html/Hu_SAMIX_Reinforcing_SAM2_with_Semantic_Adapter_and_Reference_Selecting_Policy_CVPR_2026_paper.html)
 
 [Qiang Hu](https://huster-hq.github.io/)<sup>1</sup> &emsp;
 Jiajie Wei<sup>1</sup> &emsp;
@@ -19,11 +18,18 @@ Yingjie Guo<sup>1</sup> &emsp;
 
 
 ## 🚀Overview
-SAMIX is a RL-empowered in-context segmenter comprising two core components: SA-SAM2 and SPNet. SA-SAM2 leverages a lightweight semantic adapter to transform the vanilla SAM2 into an in-context segmenter, enabling cross-image semantic tracking capabilities. Importantly, SPNet is trained via GRPO with customized verifiable rewards to retrieve valuable visual contexts from a data pool for the query image, effectively empowering SA-SAM2.
-We emoplpy SAMIX in a mix-supervised segmentation framework, where
-We employ SAMIX within a mix-supervised segmentation framework, including mask/box/scribble/point/class-labeled data and unlabeled data. SAMIX is capable of leveraging the in-context segmentation paradigm and utilizing data (with finer-supervision) as in-context examples to provide dense contextual prompts for data (with lower-supervision), thereby offering more reliable pseudo-labels for downstream segmentation models.
-![Main](assets/overview.jpg)
 
+**Problem Formulation:** Mix-supervised Segmentation aims to train a single segmentation model using heterogeneous-annotated data, including mask, box, scribble, point, class-labled, and unlabled data.
+
+**Paradigm Comparison:**
+
+- Exsing SAM-based methods (1) heavily rely on sparse spatial prompts (e.g., box, point); (2) can not address scenarios with ambiguous boundaries; (3) can not use class-labeled and unlabeled data for training; (4) overlooks the potential of collaborative learning across heterogeneous data.
+
+- Ours (1) repurpose the instance tracking mechanism of SAM2 to promote semantic tracking across data; (2) extend dense contextual prompting mechanism; (3) can use class-labeled and unlabeled data for training; (4) achieve collaborative learning across heterogeneous data.
+
+<p align="center">
+<img src="assets/overview.jpg" alt="Image" width="700px">
+<p>
 
 
 
