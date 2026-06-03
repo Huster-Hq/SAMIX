@@ -95,22 +95,6 @@ The default script configuration uses:
   - `SA-SAM2 -> cuda:0`
   - `Seg-Model + EMA -> cuda:1`
 
-You can override defaults through environment variables:
-
-```bash
-BATCH_SIZE=4 OUTPUT_DIR=/path/to/output bash scripts/train.sh
-```
-
-Or call the Python entrypoint directly:
-
-```bash
-python scripts/train_cotrain.py \
-  --manifest /path/to/manifest.json \
-  --sam2-root external/sam2 \
-  --sam2-ckpt /path/to/sam2.1_hiera_tiny.pt \
-  --sam2-config configs/sam2.1/sam2.1_hiera_t.yaml
-```
-
 
 ## Citation
 
