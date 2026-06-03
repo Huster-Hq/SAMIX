@@ -32,64 +32,6 @@ Yingjie Guo<sup>1</sup> ·
 <p>
 
 
-
-<!-- This repository currently releases the `SA-SAM2` and co-training parts of the
-project:
-
-- `SA-SAM2`: a SAM2-based in-context segmentor with semantic adapters inserted
-  into the image encoder
-- `Polyp-PVT + EMA`: an auxiliary segmentation model used during co-training
-- a mixed-supervision training framework for `mask / box / scribble / point`
-
-`SPNet` is not included yet. -->
-<!-- 
-## Highlights
-
-- Official `SAM2` is used as the base model
-- Only adapter parameters are updated during warmup
-- Support samples are selected from the full-mask pool with nearest-neighbor
-  retrieval over `SA-SAM2` image-encoder features
-- TensorBoard logging, evaluation, checkpoints, and qualitative visualizations
-  are integrated into the training pipeline -->
-
-## Repository Layout
-
-```text
-SAMIX/
-|-- README.md
-|-- requirements.txt
-|-- .gitmodules
-|-- docs/
-|   `-- data_format.md
-|-- examples/
-|   `-- dataset_manifest.example.json
-|-- external/
-|   `-- sam2/                  # official SAM2 submodule
-|-- samix/
-|   |-- adapters.py
-|   |-- data.py
-|   |-- ema.py
-|   |-- eval.py
-|   |-- framework.py
-|   |-- losses.py
-|   |-- model_utils.py
-|   |-- polyp_pvt.py
-|   |-- prompts.py
-|   |-- sa_hiera.py
-|   |-- sa_sam2.py
-|   |-- training.py
-|   `-- visualization.py
-`-- scripts/
-    |-- build_manifest.py
-    |-- prepare_joint_polyp_dataset.py
-    |-- prepare_polyp_train_layout.py
-    |-- train.sh
-    `-- train_cotrain.py
-```
-
-Large assets such as datasets, run outputs, and checkpoints are intentionally
-excluded from the repository.
-
 ## ⚙️ Environment Setup  
 
 ### 1. Create environment
