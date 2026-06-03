@@ -100,6 +100,18 @@ If you use this repository, please cite the SAMIX paper. Final BibTeX metadata
 will be added in the public release.
 
 
+## AI Contributor
+
+This repository is also developed with assistance from
+[`@codex`](https://github.com/codex), OpenAI's coding agent.
+
+<p>
+  <a href="https://github.com/codex">
+    <img src="https://github.com/codex.png" width="80" alt="Codex avatar" />
+  </a>
+</p>
+
+
 ## Acknowledgements
 
 This codebase builds on:
