@@ -12,7 +12,7 @@ Yingjie Guo<sup>1</sup> ·
 [Hongkuan Shi](https://scholar.google.com/citations?user=EXgVl7sAAAAJ&hl=en)<sup>3</sup> ·
 [Ge-Peng  Ji](https://gewelsji.github.io/)<sup>4</sup> ·
 [Qiang  Li](https://faculty.hust.edu.cn/liqiang15/zh_CN/index.htm)<sup>1</sup> ·
-[Zhiwei Wang](https://andysis.github.io/)<sup>1✉</sup> ·
+[Zhiwei Wang](https://andysis.github.io/)<sup>1</sup>
 
 <sup>1</sup>HUST &emsp; <sup>2</sup>SJTU &emsp; <sup>3</sup>Wuhan United Imaging Surgical Healthcare Co., Ltd. &emsp;<sup>4</sup>ANU &emsp;
 </div>
