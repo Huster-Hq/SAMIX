@@ -91,9 +91,7 @@ The default script configuration uses:
 - `SAM2.1 Hiera Tiny`
 - warmup for `10` epochs
 - joint training for `50` epochs
-- dual-GPU split by default:
-  - `SA-SAM2 -> cuda:0`
-  - `Seg-Model + EMA -> cuda:1`
+
 
 
 ## Citation
