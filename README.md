@@ -154,6 +154,5 @@ will be added in the public release.
 
 This codebase builds on:
 
-- the official `SAM2` project
-- `SANSA` for the semantic adapter design reference
-- `Polyp-PVT` for the auxiliary segmentation model family
+- [SAM2](https://github.com/facebookresearch/sam2)
+- [SANSA](https://github.com/ClaudiaCuttano/SANSA)
