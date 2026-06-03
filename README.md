@@ -25,7 +25,7 @@ Yingjie Guo<sup>1</sup> &emsp;
 
 - Exsing SAM-based methods (1) heavily rely on sparse spatial prompts (e.g., box, point); (2) can not address scenarios with ambiguous boundaries; (3) can not use class-labeled and unlabeled data for training; (4) overlooks the potential of collaborative learning across heterogeneous data.
 
-- Ours (1) repurpose the instance tracking mechanism of SAM2 to promote semantic tracking across data; (2) extend dense contextual prompting mechanism; (3) can use class-labeled and unlabeled data for training; (4) achieve collaborative learning across heterogeneous data.
+- Ours (1) repurpose the SAM2's instance tracking mechanism to promote semantic tracking across data, i.e., *in-context segmentation*; (2) introduce a *RL-empowered Network* to actively select in-context examples for each query; (3) can use class-labeled and unlabeled data for training; (4) achieve collaborative learning across heterogeneous data.
 
 <p align="center">
 <img src="assets/overview.jpg" alt="Image" width="700px">
