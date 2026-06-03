@@ -111,38 +111,6 @@ python scripts/train_cotrain.py \
   --sam2-config configs/sam2.1/sam2.1_hiera_t.yaml
 ```
 
-## Logging and Evaluation
-
-During training, the framework records:
-
-- warmup and co-training losses
-- TensorBoard scalar curves
-- qualitative visualizations for support/query/prediction examples
-- per-dataset test results on:
-  - `CVC-300`
-  - `CVC-ClinicDB`
-  - `CVC-ColonDB`
-  - `ETIS-LaribPolypDB`
-  - `Kvasir`
-- mean `Dice` and mean `IoU`
-
-<!-- ## Current Status
-
-Implemented:
-
-- `SA-SAM2` with semantic adapters in the SAM2 image encoder
-- `Polyp-PVT + EMA`
-- warmup + co-training framework
-- mixed-supervision data loading
-- nearest-neighbor support selection
-- TensorBoard logging and test-set evaluation
-
-Not yet released:
-
-- `SPNet`
-- final benchmark-specific training recipes
-- released paper checkpoints -->
-
 
 ## Citation
 
